@@ -11,6 +11,7 @@ class PostForm(forms.ModelForm):
             'group': 'Группа',
         }
         exclude = ('date', 'author')
+        
     def clean_subject(self):
         data = self.cleaned_data['text']
         if data == '':

@@ -5,11 +5,17 @@ User = get_user_model()
 
 
 class Group(models.Model):
-    title = models.CharField("Название группы", max_length=200, help_text='Максимум 100 символов')
+    title = models.CharField(
+        "Название группы", max_length=200,
+        help_text='Максимум 100 символов')
     slug = models.SlugField(
-        "Краткое название группы", max_length=200, unique=True, help_text='Максимум 200 символов'
+        "Краткое название группы",
+        max_length=200, unique=True, help_text='Максимум 200 символов'
     )
-    description = models.TextField("Описание", blank=True, null=True, help_text='Максимум 300 символов')
+    description = models.TextField("Описание",
+                                   blank=True,
+                                   null=True,
+                                   help_text='Максимум 300 символов')
 
     def __str__(self):
         return self.title

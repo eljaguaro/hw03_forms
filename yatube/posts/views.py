@@ -10,6 +10,8 @@ from .models import User
 ten_slice = 10
 # Главная страница
 # @login_required
+
+
 def index(request):
     post_list = Post.objects.select_related('author').all()
     paginator = Paginator(post_list, ten_slice)
@@ -111,6 +113,7 @@ def post_detail(request, post_id):
         'is_author': is_author
     }
     return render(request, 'posts/post_detail.html', context)
+
 
 @login_required
 def post_edit(request, post_id):
