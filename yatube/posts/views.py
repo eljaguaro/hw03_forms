@@ -121,15 +121,13 @@ def post_edit(request, post_id):
     if post.author != request.user:
         return redirect(f'/posts/{post_id}/')
     if request.method == 'POST':
-        # Создаём объект формы класса ContactForm
-        # и передаём в него полученные данные
         form = PostForm(request.POST)
         # Если все данные формы валидны - работаем с "очищенными данными" формы
         if form.is_valid():
-            # Берём валидированные данные формы из словаря form.cleaned_data
+            # ТУТ ПОЧЕМУ-ТО НЕ СРАБОТАЛА СМЕНА POST.SAVE() НА FORM.SAVE()
+            post.text = form.cleaned_data['text']
+            post.group = form.cleaned_data['group']
             post.save()
-            # post.text = form.cleaned_data['text']
-            # post.group = form.cleaned_data['group']
             return redirect(f'/posts/{post_id}/')
         # Post.objects.filter(pk=post_id)[0].text = text
         return render(request, 'posts/create_post.html',
