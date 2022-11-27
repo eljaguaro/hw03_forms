@@ -1,19 +1,18 @@
-from .models import Post, Group
 from django.shortcuts import render, get_object_or_404
-# from django.contrib.auth.decorators import login_required
+from .models import Post, Group
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.contrib.auth import get_user_model
 from .forms import PostForm
 from django.shortcuts import redirect
+from .models import User
 
-User = get_user_model()
 
-
+ten_slice = 10
 # Главная страница
 # @login_required
 def index(request):
-    post_list = Post.objects.all()
-    paginator = Paginator(post_list, 10)
+    post_list = Post.objects.select_related('author').all()
+    paginator = Paginator(post_list, ten_slice)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -26,8 +25,8 @@ def index(request):
 # Страница со сгруппированными постами
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    post_list = group.posts.all().order_by('-pub_date')
-    paginator = Paginator(post_list, 10)
+    post_list = group.posts.all()
+    paginator = Paginator(post_list, ten_slice)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -40,14 +39,13 @@ def group_posts(request, slug):
 
 def profile(request, username):
     author = User.objects.filter(username=username)[0]
-    posts = Post.objects.filter(author=author).order_by('-pub_date')
+    posts = Post.objects.select_related('author').filter(author=author)
     num_of_posts = len(posts)
     paginator = Paginator(posts, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
         'author': author,
-        'posts': posts,
         'postsnum': num_of_posts,
         # 'username' : username,
         'page_obj': page_obj
@@ -55,6 +53,7 @@ def profile(request, username):
     return render(request, 'posts/profile.html', context)
 
 
+@login_required
 def post_create(request):
     groups = Group.objects.all()
     # Проверяем, получен POST-запрос или какой-то другой:
@@ -96,7 +95,7 @@ def post_create(request):
 
 def post_detail(request, post_id):
     # Здесь код запроса к модели и создание словаря контекста
-    post = Post.objects.filter(pk=post_id)[0]
+    post = Post.objects.select_related('author').filter(pk=post_id)[0]
     author = post.author.username
     num_of_posts = len(Post.objects.filter(author=post.author))
     title = post.text[:30]
@@ -113,23 +112,24 @@ def post_detail(request, post_id):
     }
     return render(request, 'posts/post_detail.html', context)
 
-
+@login_required
 def post_edit(request, post_id):
     is_edit = True
     groups = Group.objects.all()
-    post = Post.objects.filter(pk=post_id)[0]
+    post = Post.objects.select_related('author').filter(pk=post_id)[0]
     # Проверяем, получен POST-запрос или какой-то другой:
+    if post.author != request.user:
+        return redirect(f'/posts/{post_id}/')
     if request.method == 'POST':
         # Создаём объект формы класса ContactForm
         # и передаём в него полученные данные
         form = PostForm(request.POST)
-
         # Если все данные формы валидны - работаем с "очищенными данными" формы
         if form.is_valid():
             # Берём валидированные данные формы из словаря form.cleaned_data
-            post.text = form.cleaned_data['text']
-            post.group = form.cleaned_data['group']
             post.save()
+            # post.text = form.cleaned_data['text']
+            # post.group = form.cleaned_data['group']
             return redirect(f'/posts/{post_id}/')
         # Post.objects.filter(pk=post_id)[0].text = text
         return render(request, 'posts/create_post.html',
