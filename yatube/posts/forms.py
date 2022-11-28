@@ -16,7 +16,4 @@ class PostForm(forms.ModelForm):
         data = self.cleaned_data['text']
         if data == '':
             raise forms.ValidationError('Вы обязательно что-то написать')
-
-        # Метод-валидатор обязательно должен вернуть очищенные данные,
-        # даже если не изменил их
         return data
