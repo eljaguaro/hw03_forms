@@ -1,5 +1,11 @@
 {% extends "base.html" %}
-{% block title %}новый пост{% endblock %}
+{% block title %}
+{% if is_edit %}
+Редактирование поста
+{% else %}
+Новый пост
+{% endif %}
+{% endblock %}
 {% block content %} 
     <main>
       <div class="container py-5">
@@ -28,7 +34,7 @@
                     <textarea name="text" cols="40" rows="10" class="form-control" required id="id_text">{% if is_edit %}{{ post.text }}{% endif %}</textarea>                
                     <small id="id_text-help" class="form-text text-muted">
                       {% if is_edit %}
-                      Текст нового поста
+                      {{ text.help_text }}
                     {% else %}
                       Новый текст поста
                     {% endif %}     
@@ -45,7 +51,7 @@
                       {% endfor %}
                     </select>
                     <small id="id_group-help" class="form-text text-muted">
-                      Группа, к которой будет относиться пост
+                      {{ group.help_text }}
                     </small>
                   </div>
                   <div class="d-flex justify-content-end">

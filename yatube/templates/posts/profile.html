@@ -3,7 +3,6 @@
 Профайл пользователя {{ author.username }}
 {% endblock %}
 {% block content %}
-    <main>
       <div class="container py-5">        
         <h1>Все посты пользователя {{ author.username }}</h1>
         <h3>Всего постов: {{ postsnum }} </h3>   
@@ -32,5 +31,4 @@
         {% endfor %}
       </div>
       {% include 'includes/paginator.html' %}
-    </main>
     {% endblock %}

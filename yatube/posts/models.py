@@ -22,14 +22,18 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    text = models.TextField(verbose_name="Основной текст", null=True)
+    text = models.TextField(verbose_name="текст",
+                            help_text='Основной текст поста', null=True)
     pub_date = models.DateTimeField(verbose_name="Дата публикации",
+                                    help_text='Дата публикации поста',
                                     null=True, auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE,
-                               verbose_name="Имя автора",
+                               verbose_name="Автор",
+                               help_text='Имя автора поста',
                                related_name='posts', null=True)
     group = models.ForeignKey(Group, on_delete=models.SET_NULL,
-                              verbose_name="Имя группы",
+                              verbose_name="группа",
+                              help_text='Название группы поста',
                               related_name='posts',
                               blank=True, null=True)
 

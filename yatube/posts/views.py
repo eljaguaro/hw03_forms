@@ -5,16 +5,16 @@ from django.core.paginator import Paginator
 from .forms import PostForm
 from django.shortcuts import redirect
 from .models import User
+from django.conf import settings
 
 
-TEN_SLICE = 10
 # Главная страница
 # @login_required
 
 
 def index(request):
     post_list = Post.objects.select_related('author', 'group').all()
-    paginator = Paginator(post_list, TEN_SLICE)
+    paginator = Paginator(post_list, settings.TEN_SLICE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -28,7 +28,7 @@ def index(request):
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     post_list = group.posts.select_related('author', 'group').all()
-    paginator = Paginator(post_list, TEN_SLICE)
+    paginator = Paginator(post_list, settings.TEN_SLICE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -42,8 +42,8 @@ def group_posts(request, slug):
 def profile(request, username):
     author = User.objects.filter(username=username)[0]
     posts = author.posts.select_related('author', 'group').all()
-    num_of_posts = len(posts)
-    paginator = Paginator(posts, TEN_SLICE)
+    num_of_posts = posts.count()
+    paginator = Paginator(posts, settings.TEN_SLICE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -72,9 +72,8 @@ def post_create(request):
 
 def post_detail(request, post_id):
     post = Post.objects.select_related('author', 'group').filter(pk=post_id)[0]
-    author = post.author.username
-    num_of_posts = len(Post.objects.select_related(
-        'author', 'group').filter(author=post.author))
+    author = User.objects.filter(username=post.author)[0]
+    num_of_posts = author.posts.select_related('author', 'group').all().count()
     title = post.text[:30]
     if request.user.username == author:
         is_author = True
@@ -98,12 +97,9 @@ def post_edit(request, post_id):
     if post.author != request.user:
         return redirect(f'/posts/{post_id}/')
     if request.method == 'POST':
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, instance=post)
         if form.is_valid():
-            # ТУТ ПОЧЕМУ-ТО НЕ СРАБОТАЛА СМЕНА POST.SAVE() НА FORM.SAVE()
-            post.text = form.cleaned_data['text']
-            post.group = form.cleaned_data['group']
-            post.save()
+            form.save()
             return redirect(f'/posts/{post_id}/')
         return render(request, 'posts/create_post.html',
                       {'form': form, 'groups': groups,
@@ -111,4 +107,4 @@ def post_edit(request, post_id):
     form = PostForm()
     return render(request, 'posts/create_post.html',
                   {'form': form, 'groups': groups,
-                   'id': post_id, 'post': post, 'is_edit': is_edit})
+                   'post': post, 'is_edit': is_edit})
