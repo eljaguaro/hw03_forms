@@ -75,7 +75,7 @@ def post_detail(request, post_id):
     author = User.objects.filter(username=post.author)[0]
     num_of_posts = author.posts.select_related('author', 'group').all().count()
     title = post.text[:30]
-    if request.user.username == author:
+    if request.user == author:
         is_author = True
     else:
         is_author = False

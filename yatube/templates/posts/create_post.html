@@ -28,21 +28,17 @@
                   {% csrf_token %}       
                   <div class="form-group row my-3 p-3">
                     <label for="id_text">
-                      {{ text.label }}                  
+                      {{ form.text.label }}                  
                       <span class="required text-danger" >*</span>                  
                     </label>
                     <textarea name="text" cols="40" rows="10" class="form-control" required id="id_text">{% if is_edit %}{{ post.text }}{% endif %}</textarea>                
                     <small id="id_text-help" class="form-text text-muted">
-                      {% if is_edit %}
-                      {{ text.help_text }}
-                    {% else %}
-                      Новый текст поста
-                    {% endif %}     
+                    {{ form.text.help_text }}    
                     </small>                  
                   </div>            
                   <div class="form-group row my-3 p-3">
                     <label for="id_group">
-                      {{ group.label }}              
+                      {{ form.group.label }}              
                     </label> 
                     <select name="group" class="form-control" id="id_group">
                       <option value="" selected>---------</option>
@@ -51,7 +47,7 @@
                       {% endfor %}
                     </select>
                     <small id="id_group-help" class="form-text text-muted">
-                      {{ group.help_text }}
+                      {{ form.group.help_text }}
                     </small>
                   </div>
                   <div class="d-flex justify-content-end">
